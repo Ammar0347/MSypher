@@ -2328,5 +2328,5 @@ def updateplan():
 if __name__ == '__main__':
     #run_server()
 #    app.secret_key = 'super secret key'
-    app.run(host='0.0.0.0', port=5000, debug = False)
+    app.run(host='0.0.0.0', port=22, debug = False)
     #app.run()
