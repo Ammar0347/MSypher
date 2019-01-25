@@ -31,7 +31,7 @@ tband_24hrs = ['00:00','01:00','02:00','03:00','04:00','05:00','06:00',
                '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', 
                '19:00', '20:00', '21:00', '22:00', '23:00']
 
-engine = create_engine('mysql+pymysql://ammar:ammar123@msypher.cncilz0i4y2d.us-east-1.rds.amazonaws.com:3306/msypherdb')
+engine = create_engine('mysql+pymysql://ammarA:ammar123@msyphercloud.cncilz0i4y2d.us-east-1.rds.amazonaws.com:3306/ammardb')
 
 def daterange(date1, date2):
     for n in range(int ((date2 - date1).days)+1):
