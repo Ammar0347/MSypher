@@ -215,9 +215,10 @@ def output2():
 
 @app.route('/convertedspots')
 def output3_1():
-    conn = sqlite3.connect("channelsplan.db")  
-    d_f = pd.read_sql_query("select * from Test_Convertor_October_Updated;", conn)
-    d_f = d_f.drop(['index'], axis=1)
+#    conn = sqlite3.connect("channelsplan.db")  
+    d_f = msypher_utils_cloud.load_converted_spots(monthm)#pd.read_sql_query("select * from Test_Convertor_January_Updated;", conn)
+    if 'index' in d_f.columns:
+        d_f = d_f.drop(['index'], axis=1)
     mydf = pd.DataFrame()
     channels = d_f['Channel'].unique().tolist()
     brands = d_f['Brand'].unique().tolist()
@@ -233,7 +234,7 @@ def output3_1():
 @app.route('/convertedspots1', methods = ['GET','POST'])
 def output3():
     if request.method == 'POST':
-        d_f = msypher_utils_cloud.load_converted_spots()
+        d_f = msypher_utils_cloud.load_converted_spots(monthm)
         if 'index' in d_f.columns:
             d_f = d_f.drop(['index'], axis=1)
         ccode = pd.ExcelFile('Channel Codes.xlsx')
@@ -267,6 +268,7 @@ def output3():
         mydf.loc[:, 'Length'] = mydf['Length'].apply(lambda x: '{0:0>5}'.format(x))
         mydf.to_csv(brand+'.txt', header=None, index=None, sep=' ', mode='w')
         return send_file(brand+'.txt', as_attachment=True)
+
 
 @app.route('/uploader', methods = ['GET','POST'])
 def uploader():

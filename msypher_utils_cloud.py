@@ -141,11 +141,17 @@ def load_entries(monthm):
     #con.close()
     return preprocess_df
 
-def load_converted_spots():
+def load_converted_spots(monthm):
     #con = sqlite3.conect("channelsplan.db", timeout=20)  
-    d_f = pd.read_sql_query("select * from Test_Convertor_January_Updated;", con=engine)
+    d_f = pd.read_sql_query("select * from Converted_"+monthm+"_Updated;", con=engine)
+#    print(d_f)
+#    d = pd.ExcelFile('Converted_Impulse4.xlsx')
+#    d_f = d.parse('Sheet1')
+#    d_f = d_f.drop(['Cost'], axis=1)
+#    print(d_f)
     #con.close()
     return d_f
+
 
 def generate_channel_summary(d_f):
     d_f = d_f[d_f['Time Band'] == "0"]
@@ -234,7 +240,7 @@ def load_pib_splits():
 
 def save_converted_file(converted_df, monthm):
 #    con = sqlite3.conect("channelsplan.db")
-    converted_df.to_sql("Test_Convertor_"+monthm+"_Updated", con=engine, if_exists="replace")    
+    converted_df.to_sql("Converted_"+monthm+"_Updated", con=engine, if_exists="replace")    
     #con.close()
 
 def load_splits():
