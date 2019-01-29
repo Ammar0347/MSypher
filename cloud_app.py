@@ -233,9 +233,9 @@ def output3_1():
 @app.route('/convertedspots1', methods = ['GET','POST'])
 def output3():
     if request.method == 'POST':
-        conn = sqlite3.connect("channelsplan.db")    
-        d_f = pd.read_sql_query("select * from Test_Convertor_"+monthm+"_Updated;", conn)
-        d_f = d_f.drop(['index'], axis=1)
+        d_f = msypher_utils_cloud.load_converted_spots()
+        if 'index' in d_f.columns:
+            d_f = d_f.drop(['index'], axis=1)
         ccode = pd.ExcelFile('Channel Codes.xlsx')
         ccodes = ccode.parse(ccode.sheet_names[0], header=None)
         code = ccodes.iloc[:,0].str.split(",").tolist()
@@ -257,12 +257,16 @@ def output3():
         mydf.loc[:,'Cost'] = '0000000000' 
         a = pd.to_datetime(mydf.Date)
         mydf.loc[:, 'Date'] = a.dt.strftime("%Y%m%d")
-        a = mydf['Start Time']
-        mydf.loc[:,'Start Time'] = [x.replace(":","") for x in a.tolist()]
+        a = mydf['Start Time'].values
+        xx = [x.astype('datetime64') for x in a]
+        xx = pd.to_datetime(xx)
+        xx = xx.time
+        xlist = [str(b) for b in xx.tolist()]
+        mydf.loc[:,'Start Time'] = [x.replace(":","") for x in xlist]
         a = mydf['Length']
         mydf.loc[:, 'Length'] = mydf['Length'].apply(lambda x: '{0:0>5}'.format(x))
-        mydf.to_csv(r'pandas.txt', header=None, index=None, sep=' ', mode='w')
-        return send_file('pandas.txt', as_attachment=True)
+        mydf.to_csv(brand+'.txt', header=None, index=None, sep=' ', mode='w')
+        return send_file(brand+'.txt', as_attachment=True)
 
 @app.route('/uploader', methods = ['GET','POST'])
 def uploader():
@@ -2126,12 +2130,13 @@ def process_file():
 @app.route('/convertor', methods = ['GET', 'POST'])
 def convertor():
     if request.method == 'GET':
-        return render_template('convertor.html', ip = ip)
+        return render_template('convertor.html')
     if request.method == 'POST':
         df = msypher_utils_cloud.load_historical_data()
-        plandf = msypher_utils_cloud.load_spots_only(monthm)
-        plandf = plandf.drop(['index'], axis=1)
-        
+        print("Loaded tracking data.")
+        plandf = pd.ExcelFile('Full_plan.xlsx')
+        plandf = plandf.parse(plandf.sheet_names[0], parse_dates=True)
+
         plandf.Channel = [ch.replace("_"," ") for ch in plandf.Channel]
         plandf.Channel = [ch.replace("TWENTYFOUR NEWS","24 NEWS") for ch in plandf.Channel]
         plandf.Channel = [ch.replace("SEVEN NEWS","7 NEWS") for ch in plandf.Channel]
@@ -2146,9 +2151,9 @@ def convertor():
         total_spots = plandf.filter(['Plan','Channel', 'Time Band', 'Total Spots'])
         total_spots = total_spots[total_spots['Time Band'] == 0]
         
-        plandf = plandf[(plandf['GRP'] > 0) & (plandf['Time Band'] != '0')]
-        print("Total rows: {0}".format(len(plandf)))
-        print(plandf.GRP.values[0])
+        plandf = plandf[plandf['Time Band'] != 0]
+        print("Total rows in plan: {0}".format(len(plandf)))
+
         date1 = pd.to_datetime(request.form['startdate'])
         date2 = pd.to_datetime(request.form['enddate'])
         week = int(request.form['backdate'])
@@ -2160,7 +2165,7 @@ def convertor():
         df = df.reset_index()
         
         merged_pib = msypher_utils_cloud.load_pib_splits() 
-        print(merged_pib)
+        print("Loaded PIB Spots.")
         
         start = time.time()
         converted_df = pd.DataFrame(columns=['Date', 'Channel', 'Start Time', 'Length', 'Brand'])
@@ -2172,9 +2177,9 @@ def convertor():
         plan_list = []
         days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
         mpib = [0,-1, 1]
-        for col in tqdm(range(6,len(plandf.columns)-4)):
-            first = mycolumns[col-6] - pd.Timedelta(weeks=week)
-            present_spots = plandf[plandf.iloc[:,col] != 0]
+        for col in tqdm(range(len(mycolumns))):
+            first = mycolumns[col] - pd.Timedelta(weeks=week)
+            present_spots = plandf[plandf.iloc[:,col+6] != 0]
             thatday = df[df.Date.dt.date == first]
             for row in present_spots.index:
                 thatchannel = thatday[thatday.Channel == present_spots.at[row,'Channel']]
@@ -2186,8 +2191,8 @@ def convertor():
                     thathour = df[(df.Channel == present_spots.at[row,'Channel']) & (df.TransmissionHour == pd.to_datetime(present_spots.at[row,'Time Band']).time().hour)]
                 if(thathour.empty):
                     thathour = df[(df.Channel == present_spots.at[row,'Channel']) & (df.Day == days[first.weekday()])]
-                for count in range(int(present_spots.at[row,plandf.columns[col]])):
-                    if(len(thathour.MidBreak.unique()) >= present_spots.at[row,plandf.columns[col]]):
+                for count in range(int(present_spots.at[row,plandf.columns[col+6]])):
+                    if(len(thathour.MidBreak.unique()) >= present_spots.at[row,plandf.columns[col+6]]):
                         thatmidbreak = thathour[thathour.MidBreak == thathour.MidBreak.unique()[count]]
                     else:
                         if(len(thathour) > 0):
@@ -2209,21 +2214,21 @@ def convertor():
                     plan_list.append(present_spots.at[row,'Plan'])
         end = time.time()
         elapsed = end - start
-        print(elapsed)
+        print("Time taken for whole process is "+str(elapsed)+" seconds.")
         
+        print("Preparing converted data...")
         date_list = [d.strftime('%#d-%b-%y') for d in date_list]
         converted_df['Date'] = date_list
         converted_df['Plan'] = plan_list
-        converted_df['Channels'] = channel_list
-        adstarttime_list = [a[:-7] for a in adstarttime_list]
+        converted_df['Channel'] = channel_list
         converted_df['Start Time'] = adstarttime_list
         converted_df['Length'] = adduration_list
         converted_df['Brand'] = brand_list
         
         converted_df = converted_df.sort_values(by=['Date','Start Time'])
-        converted_df.to_excel('Test_Convertor_'+monthm+'_Updated.xlsx')
+        converted_df.to_excel('Converted_'+monthm+'.xlsx')
         msypher_utils_cloud.save_converted_file(converted_df, monthm)
-        return render_template('convertor.html', ip = ip)
+        return render_template('success.html')
 
 @app.route('/updateplan', methods = ['GET', 'POST'])
 def updateplan():
