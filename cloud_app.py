@@ -2236,7 +2236,7 @@ def convertor():
         converted_df = converted_df.sort_values(by=['Date','Start Time'])
         converted_df.to_excel('Converted_'+monthm+'.xlsx')
         msypher_utils_cloud.save_converted_file(converted_df, monthm)
-        return render_template('convertor.html')
+        return render_template('success.html')
 
 @app.route('/updateplan', methods = ['GET', 'POST'])
 def updateplan():
