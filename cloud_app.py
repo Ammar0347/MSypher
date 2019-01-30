@@ -2136,7 +2136,7 @@ def convertor():
     if request.method == 'POST':
         df = msypher_utils_cloud.load_historical_data()
         print("Loaded tracking data.")
-        plandf = pd.ExcelFile('Full_Plan.xlsx')
+        plandf = pd.ExcelFile('Full_plan.xlsx')
         plandf = plandf.parse(plandf.sheet_names[0], parse_dates=True)
 
         plandf.Channel = [ch.replace("_"," ") for ch in plandf.Channel]
