@@ -223,10 +223,17 @@ def save_distribution(dist, nameofplantype, monthm):
 def load_historical_data():
 #    con = sqlite3.conect("channelsplan.db")
 #    df = pd.read_sql_query("select Channel,Date,Day,AdType,AdStart,MidBreak,TransmissionHour from Historical_tracking_data where AdType like 'Spot/TVC' and MidBreak like 'Mid Break%';", con=engine)
-    df = pd.read_sql_query("select Channel,Date,Day,AdType,AdStart,MidBreak,TransmissionHour from Tracking_Data where AdType like 'Spot/TVC';", con=engine)
+#    df = pd.read_sql_query("select Channel,Date,Day,AdType,AdStart,MidBreak,TransmissionHour from Tracking_Data where AdType like 'Spot/TVC';", con=engine)
 #    df = df[df.AdType == 'Spot/TVC']
 #    df = df[(df.MidBreak != 'Opening') & (df.MidBreak != 'Closing') & (df.MidBreak != 'Casual') & (df.MidBreak != 'Prog. Part')]
-    df = df.sort_values(by='Date')
+    # Access data store
+    data_store = pd.HDFStore('processed_data.h5')
+    
+    # Retrieve data using key
+    df = data_store['preprocessed_df']
+    data_store.close()
+
+#    df = df.sort_values(by='Date')
     #con.close()
     return df
     

@@ -234,6 +234,8 @@ def output3_1():
 @app.route('/convertedspots1', methods = ['GET','POST'])
 def output3():
     if request.method == 'POST':
+#        conn = sqlite3.connect("channelsplan.db")    
+#        d_f = pd.read_sql_query("select * from Test_Convertor_January_Updated;", con=engine)
         d_f = msypher_utils_cloud.load_converted_spots(monthm)
         if 'index' in d_f.columns:
             d_f = d_f.drop(['index'], axis=1)
@@ -267,8 +269,9 @@ def output3():
         a = mydf['Length']
         mydf.loc[:, 'Length'] = mydf['Length'].apply(lambda x: '{0:0>5}'.format(x))
         mydf.to_csv(brand+'.txt', header=None, index=None, sep=' ', mode='w')
+#        f= open(brand+".txt","w+")
+#        f.close()
         return send_file(brand+'.txt', as_attachment=True)
-
 
 @app.route('/uploader', methods = ['GET','POST'])
 def uploader():
@@ -417,7 +420,7 @@ def initializer():
                     # Removing channels on which inventory isn't available.
                     foc_channels = foc_df_consolidated.Channel.unique().tolist()
                     channel_select = [x for x in channel_select if x in foc_channels]
-                
+                print(channel_select)
                 for i in range(len(channel_select)):
                     if(budget_df.loc[budget_df['Channel Name'] == channel_select[i],brand] is not None):
                         copybudget = budget_df.loc[budget_df['Channel Name'] == channel_select[i],brand] * budgetsplit
@@ -2128,14 +2131,15 @@ def process_file():
 #                               splits=splits_df.index.tolist())
                                #table= view_df.to_html(index=False))
 
-
 @app.route('/convertor', methods = ['GET', 'POST'])
 def convertor():
     if request.method == 'GET':
         return render_template('convertor.html')
     if request.method == 'POST':
         df = msypher_utils_cloud.load_historical_data()
+        print(len(df))
         print("Loaded tracking data.")
+        
         plandf = pd.ExcelFile('Full_plan.xlsx')
         plandf = plandf.parse(plandf.sheet_names[0], parse_dates=True)
 
@@ -2334,6 +2338,7 @@ def updateplan():
         #spotsonly_df = pd.DataFrame(columns=plandf.columns)
         plandf.to_sql(monthm+"_fullplan_spots", conn, if_exists="replace")
         return "Updated!"#render_template('update_inventory.html')
+
 if __name__ == '__main__':
     #run_server()
 #    app.secret_key = 'super secret key'
