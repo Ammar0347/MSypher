@@ -2136,7 +2136,7 @@ def convertor():
     if request.method == 'POST':
         df = msypher_utils_cloud.load_historical_data()
         print("Loaded tracking data.")
-        plandf = pd.ExcelFile('Full_plan.xlsx')
+        plandf = pd.ExcelFile('Plans/Only_Spots/Impulse4.xlsx')
         plandf = plandf.parse(plandf.sheet_names[0], parse_dates=True)
 
         plandf.Channel = [ch.replace("_"," ") for ch in plandf.Channel]
@@ -2179,6 +2179,7 @@ def convertor():
         plan_list = []
         days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
         mpib = [0,-1, 1]
+#        for col in tqdm(range(6,len(plandf.columns)-4)):
         for col in tqdm(range(len(mycolumns))):
             first = mycolumns[col] - pd.Timedelta(weeks=week)
             present_spots = plandf[plandf.iloc[:,col+6] != 0]
@@ -2223,6 +2224,7 @@ def convertor():
         converted_df['Date'] = date_list
         converted_df['Plan'] = plan_list
         converted_df['Channel'] = channel_list
+#        adstarttime_list = [a[:-7] for a in adstarttime_list]
         converted_df['Start Time'] = adstarttime_list
         converted_df['Length'] = adduration_list
         converted_df['Brand'] = brand_list
@@ -2230,7 +2232,7 @@ def convertor():
         converted_df = converted_df.sort_values(by=['Date','Start Time'])
         converted_df.to_excel('Converted_'+monthm+'.xlsx')
         msypher_utils_cloud.save_converted_file(converted_df, monthm)
-        return render_template('success.html')
+        return render_template('convertor.html')
 
 @app.route('/updateplan', methods = ['GET', 'POST'])
 def updateplan():
