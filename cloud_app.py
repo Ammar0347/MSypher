@@ -222,6 +222,7 @@ def output3_1():
     mydf = pd.DataFrame()
     channels = d_f['Channel'].unique().tolist()
     brands = d_f['Brand'].unique().tolist()
+    print(d_f)
     mydf = d_f[d_f.Brand == brands[0]]
     mydf.columns = ['Date', 'Channels', 'Start Time', 'Length', 'Cost', 'Title']
     mydf.loc[:,'Cost'] = 1
@@ -267,7 +268,7 @@ def output3():
         xlist = [str(b) for b in xx.tolist()]
         mydf.loc[:,'Start Time'] = [x.replace(":","") for x in xlist]
         a = mydf['Length']
-        mydf.loc[:, 'Length'] = mydf['Length'].apply(lambda x: '{0:0>5}'.format(x))
+        mydf.loc[:, 'Length'] = mydf['Length'].apply(lambda x: '{0:0>5}'.format(int(x)))
         mydf.to_csv(brand+'.txt', header=None, index=None, sep=' ', mode='w')
 #        f= open(brand+".txt","w+")
 #        f.close()
@@ -2140,9 +2141,10 @@ def convertor():
         print(len(df))
         print("Loaded tracking data.")
         
-        plandf = pd.ExcelFile('Full_plan.xlsx')
-        plandf = plandf.parse(plandf.sheet_names[0], parse_dates=True)
-
+#        plandf = pd.ExcelFile('Full_plan.xlsx')
+#        plandf = plandf.parse(plandf.sheet_names[0], parse_dates=True)
+        plandf = msypher_utils_cloud.load_spots_only(monthm)
+        
         plandf.Channel = [ch.replace("_"," ") for ch in plandf.Channel]
         plandf.Channel = [ch.replace("TWENTYFOUR NEWS","24 NEWS") for ch in plandf.Channel]
         plandf.Channel = [ch.replace("SEVEN NEWS","7 NEWS") for ch in plandf.Channel]
@@ -2157,15 +2159,22 @@ def convertor():
         total_spots = plandf.filter(['Plan','Channel', 'Time Band', 'Total Spots'])
         total_spots = total_spots[total_spots['Time Band'] == 0]
         
-        plandf = plandf[plandf['Time Band'] != 0]
+        plandf = plandf[(plandf['Time Band'] != '0')]
         print("Total rows in plan: {0}".format(len(plandf)))
-
+#        print(plandf['Time Band'].unique())
+        
+#        print(plandf.index.unique())
+#        print(plandf.reindex())
+#        print(plandf.index.unique())
+        
         date1 = pd.to_datetime(request.form['startdate'])
         date2 = pd.to_datetime(request.form['enddate'])
         week = int(request.form['backdate'])
         mycolumns = []
+        mydateformat = []
         for dt in daterange(date1, date2):
             mycolumns.append(dt.date())
+            mydateformat.append(dt.strftime("%a_%e-%b"))
 
         df['Date'] = pd.to_datetime(df['Date'])
         df = df.reset_index()
@@ -2183,47 +2192,62 @@ def convertor():
         plan_list = []
         days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
         mpib = [0,-1, 1]
-#        for col in tqdm(range(6,len(plandf.columns)-4)):
-        for col in tqdm(range(len(mycolumns))):
-            first = mycolumns[col] - pd.Timedelta(weeks=week)
-            present_spots = plandf[plandf.iloc[:,col+6] != 0]
-            thatday = df[df.Date.dt.date == first]
-            for row in present_spots.index:
-                thatchannel = thatday[thatday.Channel == present_spots.at[row,'Channel']]
-                thathour = thatchannel[thatchannel.TransmissionHour == pd.to_datetime(present_spots.at[row,'Time Band']).time().hour]
-                if(thathour.empty):
-                    thathour = df[(df.Channel == present_spots.at[row,'Channel']) & (df.TransmissionHour == pd.to_datetime(present_spots.at[row,'Time Band']).time().hour)
-                                 & (df.Day == days[first.weekday()])]
-                if(thathour.empty):
-                    thathour = df[(df.Channel == present_spots.at[row,'Channel']) & (df.TransmissionHour == pd.to_datetime(present_spots.at[row,'Time Band']).time().hour)]
-                if(thathour.empty):
-                    thathour = df[(df.Channel == present_spots.at[row,'Channel']) & (df.Day == days[first.weekday()])]
-                for count in range(int(present_spots.at[row,plandf.columns[col+6]])):
-                    if(len(thathour.MidBreak.unique()) >= present_spots.at[row,plandf.columns[col+6]]):
-                        thatmidbreak = thathour[thathour.MidBreak == thathour.MidBreak.unique()[count]]
-                    else:
-                        if(len(thathour) > 0):
-                            thatmidbreak = thathour[thathour.MidBreak == thathour.MidBreak.unique()[len(thathour.MidBreak.unique())-1]]
-        
-                    if(merged_pib.PIBs[(merged_pib.index == present_spots.at[row,'Channel'])].values > 0):
-                        merged_pib.PIBs[merged_pib.index == present_spots.at[row,'Channel']]-=1
-                        if(len(thatmidbreak) > 1):
-                            thatspot = thatmidbreak.iloc[random.choice(mpib),:]
+#        print(mycolumns)
+#        print(mydateformat)
+        counter=0
+        for col in tqdm(range(6,len(plandf.columns)-4)):
+#        for col in tqdm(range(len(mycolumns))):
+            if(plandf.columns[col] in mydateformat):
+                print("Date: "+plandf.columns[col])
+#                print(mycolumns[counter])
+#                print(mydateformat[counter])
+#                print(plandf.columns[col])
+                first = mycolumns[counter] - pd.Timedelta(weeks=week)
+                present_spots = plandf[plandf.iloc[:,col] != 0]
+                thatday = df[df.Date.dt.date == first]
+#                print(plandf.iloc[:,col])
+                for row in present_spots.index:
+#                    print(present_spots.at[row,'Time Band'])
+#                    input("Wait")
+                    thatchannel = thatday[thatday.Channel == present_spots.at[row,'Channel']]
+                    thathour = thatchannel[thatchannel.TransmissionHour == pd.to_datetime(present_spots.at[row,'Time Band']).time().hour]
+                    if(thathour.empty):
+                        thathour = df[(df.Channel == present_spots.at[row,'Channel']) & (df.TransmissionHour == pd.to_datetime(present_spots.at[row,'Time Band']).time().hour)
+                                     & (df.Day == days[first.weekday()])]
+                    if(thathour.empty):
+                        thathour = df[(df.Channel == present_spots.at[row,'Channel']) & (df.TransmissionHour == pd.to_datetime(present_spots.at[row,'Time Band']).time().hour)]
+                    if(thathour.empty):
+                        thathour = df[(df.Channel == present_spots.at[row,'Channel']) & (df.Day == days[first.weekday()])]
+                    for count in range(int(present_spots.at[row,plandf.columns[col]])):
+                        if(len(thathour.MidBreak.unique()) >= present_spots.at[row,plandf.columns[col]]):
+                            thatmidbreak = thathour[thathour.MidBreak == thathour.MidBreak.unique()[count]]
                         else:
-                            thatspot = thatmidbreak.iloc[random.choice(mpib[:2]),:]
-                    else:
-                        thatspot = thatmidbreak.iloc[int(len(thatmidbreak)/2),:]
-                    date_list.append(first)
-                    channel_list.append(present_spots.at[row,'Channel'])
-                    adstarttime_list.append(thatspot.AdStart)
-                    adduration_list.append(present_spots.at[row,'Duration'])
-                    brand_list.append(present_spots.at[row,'Brand'])
-                    plan_list.append(present_spots.at[row,'Plan'])
+                            if(len(thathour) > 0):
+                                thatmidbreak = thathour[thathour.MidBreak == thathour.MidBreak.unique()[len(thathour.MidBreak.unique())-1]]
+            
+                        if(merged_pib.PIBs[(merged_pib.index == present_spots.at[row,'Channel'])].values > 0):
+                            merged_pib.PIBs[merged_pib.index == present_spots.at[row,'Channel']]-=1
+                            if(len(thatmidbreak) > 1):
+                                thatspot = thatmidbreak.iloc[random.choice(mpib),:]
+                            else:
+                                thatspot = thatmidbreak.iloc[random.choice(mpib[:2]),:]
+                        else:
+                            thatspot = thatmidbreak.iloc[int(len(thatmidbreak)/2),:]
+                        
+                        date_list.append(first)
+                        channel_list.append(present_spots.at[row,'Channel'])
+                        adstarttime_list.append(thatspot.AdStart)
+                        adduration_list.append(present_spots.at[row,'Duration'])
+                        brand_list.append(present_spots.at[row,'Brand'])
+                        plan_list.append(present_spots.at[row,'Plan'])
+                        
+                counter+=1
         end = time.time()
         elapsed = end - start
         print("Time taken for whole process is "+str(elapsed)+" seconds.")
         
         print("Preparing converted data...")
+        
         date_list = [d.strftime('%#d-%b-%y') for d in date_list]
         converted_df['Date'] = date_list
         converted_df['Plan'] = plan_list
