@@ -2161,11 +2161,6 @@ def convertor():
         
         plandf = plandf[(plandf['Time Band'] != '0')]
         print("Total rows in plan: {0}".format(len(plandf)))
-#        print(plandf['Time Band'].unique())
-        
-#        print(plandf.index.unique())
-#        print(plandf.reindex())
-#        print(plandf.index.unique())
         
         date1 = pd.to_datetime(request.form['startdate'])
         date2 = pd.to_datetime(request.form['enddate'])
@@ -2192,23 +2187,15 @@ def convertor():
         plan_list = []
         days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
         mpib = [0,-1, 1]
-#        print(mycolumns)
-#        print(mydateformat)
         counter=0
         for col in tqdm(range(6,len(plandf.columns)-4)):
 #        for col in tqdm(range(len(mycolumns))):
             if(plandf.columns[col] in mydateformat):
                 print("Date: "+plandf.columns[col])
-#                print(mycolumns[counter])
-#                print(mydateformat[counter])
-#                print(plandf.columns[col])
                 first = mycolumns[counter] - pd.Timedelta(weeks=week)
                 present_spots = plandf[plandf.iloc[:,col] != 0]
                 thatday = df[df.Date.dt.date == first]
-#                print(plandf.iloc[:,col])
                 for row in present_spots.index:
-#                    print(present_spots.at[row,'Time Band'])
-#                    input("Wait")
                     thatchannel = thatday[thatday.Channel == present_spots.at[row,'Channel']]
                     thathour = thatchannel[thatchannel.TransmissionHour == pd.to_datetime(present_spots.at[row,'Time Band']).time().hour]
                     if(thathour.empty):
@@ -2252,7 +2239,6 @@ def convertor():
         converted_df['Date'] = date_list
         converted_df['Plan'] = plan_list
         converted_df['Channel'] = channel_list
-#        adstarttime_list = [a[:-7] for a in adstarttime_list]
         converted_df['Start Time'] = adstarttime_list
         converted_df['Length'] = adduration_list
         converted_df['Brand'] = brand_list
