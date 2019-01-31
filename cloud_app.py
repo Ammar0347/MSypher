@@ -186,7 +186,8 @@ def output1():
 #    latest_file = max(list_of_files, key=os.path.getctime)
 #    d_f = pd.read_excel(latest_file)
     d_f = msypher_utils_cloud.load_spots_only(monthm)
-    d_f = d_f.drop(['index'], axis=1)
+    if 'index' in d_f.columns:
+        d_f = d_f.drop(['index'], axis=1)
 
     channels = d_f['Channel'].unique().tolist()
     brands = d_f['Brand'].unique().tolist()
