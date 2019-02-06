@@ -37,7 +37,11 @@ engine = create_engine('mysql+pymysql://ammarA:ammar123@msyphercloud.cncilz0i4y2
 def daterange(date1, date2):
     for n in range(int ((date2 - date1).days)+1):
         yield date1 + timedelta(n)
-        
+ 
+def load_user(user,pwd):
+    infodf = pd.read_sql_query('''select * from users where username="%s" AND password="%s";''' %(user, pwd), con=engine)
+    return infodf
+       
 def load_optimizer(x, bands):
     # For inventory dataframe
     inventory_df = x.iloc[4:bands+4,12:19]

@@ -4,7 +4,7 @@ Created on Fri May 25 14:01:59 2018
 
 @author: Ammar.Aamir
 """
-from flask import Flask, render_template, request, send_file, url_for, redirect, make_response, send_from_directory
+from flask import Flask, render_template, request, send_file, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 import sqlite3
 import pandas as pd
@@ -55,6 +55,7 @@ app = Flask(__name__)
 CORS(app)
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///students.sqlite3'
 app.wsgi_app = ReverseProxied(app.wsgi_app)
+app.config['SECRET_KEY'] = "ammarbinaamir"
 db = SQLAlchemy(app)
 
 #ip = 'http://10.166.169.207:5000'
@@ -191,6 +192,7 @@ def output1():
 
     channels = d_f['Channel'].unique().tolist()
     brands = d_f['Brand'].unique().tolist()
+    d_f = d_f[d_f.Brand.isin(session['brands'])]
     return render_template('summary1.html',
                            ip = ip,
                            channels= channels,
@@ -205,9 +207,11 @@ def output2():
     
     d_f = msypher_utils_cloud.load_spots_only(monthm)
     d_f = d_f.drop(['index'], axis=1)
+    d_f = d_f[d_f.Brand.isin(session['brands'])]
     summary_df = msypher_utils_cloud.generate_channel_summary(d_f)
     channels = d_f['Channel'].unique().tolist()
     brands = d_f['Brand'].unique().tolist()
+    
     return render_template('channelwise_summary.html', 
                            ip = ip,
                            channels= channels, 
@@ -223,7 +227,7 @@ def output3_1():
     mydf = pd.DataFrame()
     channels = d_f['Channel'].unique().tolist()
     brands = d_f['Brand'].unique().tolist()
-    print(d_f)
+    
     mydf = d_f[d_f.Brand == brands[0]]
     mydf.columns = ['Date', 'Channels', 'Start Time', 'Length', 'Cost', 'Title']
     mydf.loc[:,'Cost'] = 1
@@ -322,50 +326,23 @@ def login():
     if request.method == 'POST':
         user = request.form['log']
         pwd = request.form['pwd']
-        print(user)
-        print(pwd)
-        users_df = pd.DataFrame()
-        users_df['Username'] = ['ammar.aamir', 'saeed.khan', 'agha.zohaib','agha.ali',
-                                'murtaza.nabi', 'rahmeen.fazal', 'fatima.mir', 'omer.khan',
-                                'izhar.khan', 'sarwaan.shah', 'shamin.ahmad','arqam.tabani',
-                                'moiz.bari', 'murtaza.zaidi', 'faryal.nathani', 'amna.elahi',
-                                'wardia.ather', 'uzair.asif', 'zohaib.naseer', 'abbas.qureshi',
-                                'raqib.inayat', 'zakir.bilal', 'kazim.ali'] 
-        users_df['Password'] = ['123', '123', '123', '123',
-                                '123', '123', '123', '123',
-                                '123', '123', '123', '123',
-                                '123', '123', '123', '123',
-                                '123', '123', '123', '123',
-                                '123', '123', '123']
-        users_df['Role'] = ['Admin', 'Admin', 'Admin', 'Admin',
-                            'Admin', 'Planner', 'Planner', 'Planner',
-                            'Planner','Planner','Planner','Planner',
-                            'Planner','Planner','Planner','Planner',
-                            'Planner','Planner','Planner','Planner',
-                            'Buying', 'Buying', 'Buying']
         global role
-        role = users_df.Role[users_df["Username"] == user]
-        role = role.values[0]
-
-        if(user in users_df['Username'].values and pwd in users_df['Password'].values 
-           and role=="Planner" or role=="Admin"):
-#            conn = sqlite3.connect("channelsplan.db")
-#            splits_df = pd.read_sql_query("select * from Brand_splits;", conn)
+        infodf = msypher_utils_cloud.load_user(user,pwd)
+        brands_index = infodf.brands.values[0].split(',')
+        brands_index = list(map(int, brands_index))
+        session['role'] = infodf.role.values[0]
+        session['user'] = infodf.username.values[0]
+        if(session['role']=="Planner" or session['role']=="Admin"):
             splits_df = msypher_utils_cloud.load_splits()
-            splits_df.index = splits_df["Brands"]
-            splits_df = splits_df.drop(['index', 'Brands'], axis=1)
-            username = "Admin"
-            userid = "admin@sypher"
+            session['brands'] = splits_df.Brands[splits_df.index.isin(brands_index)].tolist()
+
             return render_template('index.html',
                                    ip = ip,
-                                   username=username,
-                                   userid=userid,
-                                   role=role,
-                                   splits=splits_df.index.tolist())
-        elif(user in users_df['Username'].values and pwd in users_df['Password'].values and role=="Buying"):
-            username = "Buying"
-            userid = "buying@sypher"
-            return render_template('upload.html', username=username, userid=userid, ip = ip)
+                                   username=session['user'],
+                                   role=session['role'],
+                                   splits=session['brands'])
+        elif(session['role']=="Buying"):
+            return render_template('upload.html', username=session['user'], ip = ip)
         else:
             return render_template('login.html', ip = ip)
 
