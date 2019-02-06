@@ -60,7 +60,7 @@ db = SQLAlchemy(app)
 
 #ip = 'http://10.166.169.207:5000'
 ip = 'http://10.143.71.132:8888'
-monthm = "January_2019"
+monthm = "February_2019"
 final_df = pd.DataFrame()
 spotsonly_df = pd.DataFrame()
 preprocess_df = pd.DataFrame(columns = ['Brand Name', 'Caption', 'Channel Name', 'Duration', 'Allocated Budget', 'Campaign Type', 'Launch Date', 'Specific Slot',  'Campaign Start Date', 'Campaign End Date', 'Others', 'Morning', 'Afternoon', 'Matinee', 'EPT', 'PT', 'LPT'])
@@ -175,6 +175,7 @@ def output():
     
     channels = d_f['Channel'].unique().tolist()
     brands = d_f['Brand'].unique().tolist()
+    d_f = d_f[d_f.Brand.isin(session['brands'])]
     return render_template('summary.html',
                            ip = ip,
                            channels= channels, 
@@ -206,7 +207,8 @@ def output2():
 #    d_f = pd.read_excel(latest_file)
     
     d_f = msypher_utils_cloud.load_spots_only(monthm)
-    d_f = d_f.drop(['index'], axis=1)
+    if 'index' in d_f.columns:
+        d_f = d_f.drop(['index'], axis=1)
     d_f = d_f[d_f.Brand.isin(session['brands'])]
     summary_df = msypher_utils_cloud.generate_channel_summary(d_f)
     channels = d_f['Channel'].unique().tolist()
@@ -225,12 +227,14 @@ def output3_1():
     if 'index' in d_f.columns:
         d_f = d_f.drop(['index'], axis=1)
     mydf = pd.DataFrame()
+    d_f = d_f[d_f.Brand.isin(session['brands'])]
     channels = d_f['Channel'].unique().tolist()
     brands = d_f['Brand'].unique().tolist()
     
-    mydf = d_f[d_f.Brand == brands[0]]
-    mydf.columns = ['Date', 'Channels', 'Start Time', 'Length', 'Cost', 'Title']
-    mydf.loc[:,'Cost'] = 1
+    if(len(brands) > 0):
+        mydf = d_f[d_f.Brand == brands[0]]
+        mydf.columns = ['Date', 'Channels', 'Start Time', 'Length', 'Cost', 'Title']
+        mydf.loc[:,'Cost'] = 1
     return render_template('convertedspots_summary.html', 
                            ip = ip,
                            channels= channels, 
@@ -243,6 +247,7 @@ def output3():
 #        conn = sqlite3.connect("channelsplan.db")    
 #        d_f = pd.read_sql_query("select * from Test_Convertor_January_Updated;", con=engine)
         d_f = msypher_utils_cloud.load_converted_spots(monthm)
+        d_f = d_f[d_f.Brand.isin(session['brands'])]
         if 'index' in d_f.columns:
             d_f = d_f.drop(['index'], axis=1)
         ccode = pd.ExcelFile('Channel Codes.xlsx')
@@ -2092,7 +2097,7 @@ def process_file():
         spotsonly_df["Time Band"] = spotsonly_df["Time Band"].astype(str)
         spotsonly_df['CPRP'] = spotsonly_df.CPRP.replace(np.inf, 0)
         msypher_utils_cloud.save_spots_only(spotsonly_df, monthm)
-#        msypher_utils_cloud.save_spots_with_inventory(final_df, monthm)
+        msypher_utils_cloud.save_spots_with_inventory(final_df, monthm)
 #        final_df.to_sql(monthm+"_fullplan_spotswithinventory", conn, if_exists="replace")        
         
 #        filename = "Full_plan"
