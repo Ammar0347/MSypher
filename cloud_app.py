@@ -529,8 +529,9 @@ def process_file():
             channel_select = r['Channel Name']
             c = channel_select.replace("_", " ")
             print(c)
-            if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0) & (len(foc_df_consolidated.loc[foc_df_consolidated['Channel']==c, :])==0) & (len(cprp_df_consolidated.loc[cprp_df_consolidated['Channel']==c, :])==0)):
-                continue
+            if (cprp_df_consolidated is not None) | (foc_df_consolidated is not None):
+                if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0) & (len(foc_df_consolidated.loc[foc_df_consolidated['Channel']==c, :])==0) & (len(cprp_df_consolidated.loc[cprp_df_consolidated['Channel']==c, :])==0)):
+                    continue
 
             brand = r['Brand Name']
             caption = r['Caption']
@@ -997,7 +998,7 @@ def process_file():
                     while(times != 15):
                         for col in range(len(plan_df.columns)-1, -1,-1):
                             if(plan_df.columns[col] in campaign_dates):
-                                for row in range(0,len(tband)):
+                                for row in range(8,len(tband)):
                                     if(invplan_df_consolidated.loc[(invplan_df_consolidated['Channel']==c) & (invplan_df_consolidated['Time Band'] == tband[row]), invplan_df_consolidated.columns.values[col+1]].values >= dur_min
                                        and plan_df.iloc[row,col] < MAX_SPOTS_PER_HOUR):
                                         if(remainingbudget >= (rates_df_consolidated.loc[(rates_df_consolidated['Channel']==c) & (rates_df_consolidated['Time Band'] == tband[row]), rates_df_consolidated.columns.values[col+1]].values * dur_min)):
