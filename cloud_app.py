@@ -333,11 +333,12 @@ def login():
         pwd = request.form['pwd']
         global role
         infodf = msypher_utils_cloud.load_user(user,pwd)
-        brands_index = infodf.brands.values[0].split(',')
-        brands_index = list(map(int, brands_index))
         session['role'] = infodf.role.values[0]
         session['user'] = infodf.username.values[0]
+
         if(session['role']=="Planner" or session['role']=="Admin"):
+            brands_index = infodf.brands.values[0].split(',')
+            brands_index = list(map(int, brands_index))
             splits_df = msypher_utils_cloud.load_splits()
             session['brands'] = splits_df.Brands[splits_df.index.isin(brands_index)].tolist()
 
@@ -398,12 +399,14 @@ def initializer():
                     channel_select = [x for x in channel_select if x in paid_channels]
                 elif(plan =="CPRP"):
                     # Removing channels on which inventory isn't available.
-                    cprp_channels = cprp_df_consolidated.Channel.unique().tolist()
-                    channel_select = [x for x in channel_select if x in cprp_channels]
+                    if cprp_df_consolidated is not None:
+                        cprp_channels = cprp_df_consolidated.Channel.unique().tolist()
+                        channel_select = [x for x in channel_select if x in cprp_channels]
                 elif(plan == "FOC"):
                     # Removing channels on which inventory isn't available.
-                    foc_channels = foc_df_consolidated.Channel.unique().tolist()
-                    channel_select = [x for x in channel_select if x in foc_channels]
+                    if foc_df_consolidated is not None:
+                        foc_channels = foc_df_consolidated.Channel.unique().tolist()
+                        channel_select = [x for x in channel_select if x in foc_channels]
                 print(channel_select)
                 for i in range(len(channel_select)):
                     if(budget_df.loc[budget_df['Channel Name'] == channel_select[i],brand] is not None):
@@ -493,8 +496,8 @@ def initializer():
         return render_template('index.html',
                                brand=brand,
                                ip = ip,
-                               splits=splits_df.index.tolist(),
-                               role=role,
+                               splits=session['brands'],
+                               role=session['role'],
                                counter=counter,
                                progress = percent_progress,
                                table = preprocess_df.to_html(classes = 'table dataTable no-footer" id = "data-table" style = "display:block;overflow:auto', na_rep = "", index = False, border=0))
