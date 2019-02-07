@@ -474,11 +474,11 @@ def initializer():
 #            
 #            preprocess_df['Campaign Type'][preprocess_df['Caption'] == caption] = plantype 
 #            preprocess_df['Duration'][preprocess_df['Caption'] == caption] = duration
-        preprocess_df["Brand Name"] = preprocess_df["Brand Name"].astype(str)
-        preprocess_df["Caption"] = preprocess_df["Caption"].astype(str)
-        preprocess_df["Channel Name"] = preprocess_df["Channel Name"].astype(str)
-        preprocess_df["Plan"] = preprocess_df["Plan"].astype(str)
-        preprocess_df["Specific Slot"] = preprocess_df["Specific Slot"].astype(str)
+#        preprocess_df["Brand Name"] = preprocess_df["Brand Name"].astype(str)
+#        preprocess_df["Caption"] = preprocess_df["Caption"].astype(str)
+#        preprocess_df["Channel Name"] = preprocess_df["Channel Name"].astype(str)
+#        preprocess_df["Plan"] = preprocess_df["Plan"].astype(str)
+#        preprocess_df["Specific Slot"] = preprocess_df["Specific Slot"].astype(str)
         preprocess_df.Duration = preprocess_df.Duration.astype(np.float32)
         preprocess_df.Others = preprocess_df.Others.astype(np.float32)
         preprocess_df.Morning = preprocess_df.Morning.astype(np.float32)
