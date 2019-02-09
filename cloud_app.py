@@ -529,9 +529,10 @@ def process_file():
             channel_select = r['Channel Name']
             c = channel_select.replace("_", " ")
             print(c)
-            if (cprp_df_consolidated is not None) | (foc_df_consolidated is not None):
-                if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0) & (len(foc_df_consolidated.loc[foc_df_consolidated['Channel']==c, :])==0) & (len(cprp_df_consolidated.loc[cprp_df_consolidated['Channel']==c, :])==0)):
-                    continue
+#            if (cprp_df_consolidated is not None) | (foc_df_consolidated is not None):
+#            if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0) & (len(foc_df_consolidated.loc[foc_df_consolidated['Channel']==c, :])==0) & (len(cprp_df_consolidated.loc[cprp_df_consolidated['Channel']==c, :])==0)):
+            if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0)):
+                continue
 
             brand = r['Brand Name']
             caption = r['Caption']

@@ -23,7 +23,7 @@ channel_list_budget = ["ARY DIGITAL", "HUM TV", "GEO ENTERTAINMENT", "TV ONE", "
                        "WASEB", "VSH NEWS", "AVT KHYBER", "ARUJ TV", "PASHTO 1", "JALWA", "EIGHTXM", 
                        "CARTOON NETWORK", "NICKELODEON", "MASALA TV", "PUBLIC NEWS", "TEN SPORTS", "GEO SUPER", 
                        "PTV HOME", "SUCH TV", "MEHRAN TV", "KTN", "DHARTI TV", "AWAZ", "KIDS POP", "KIDS ZONE",
-                       "ATV", "LAHORE RUNG", "HUM SITARAY", "BOL NEWS", "KTN NEWS", "SINDH TV NEWS",
+                       "ATV", "HUM SITARAY", "BOL NEWS", "KTN NEWS", "SINDH TV NEWS",
                        "PUNJAB TV", "KAY 2", "ARY MUSIK", "CINEMACHI KIDS", "GTV", "ROHI TV", "AFGHAN TV"]
 
 tband_24hrs = ['00:00','01:00','02:00','03:00','04:00','05:00','06:00',
