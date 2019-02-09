@@ -2099,7 +2099,7 @@ def process_file():
 #        spotsonly_df["Channel"] = spotsonly_df["Channel"].astype(str)
 #        spotsonly_df["Brand"] = spotsonly_df["Brand"].astype(str)
 #        spotsonly_df["Caption"] = spotsonly_df["Caption"].astype(str)
-        spotsonly_df["Time Band"] = spotsonly_df["Time Band"].astype(str)
+#        spotsonly_df["Time Band"] = spotsonly_df["Time Band"].astype(str)
         spotsonly_df['CPRP'] = spotsonly_df.CPRP.replace(np.inf, 0)
         spotsonly_df.columns = spotsonly_df.columns.str.strip()
         msypher_utils_cloud.save_spots_only(spotsonly_df, monthm)
