@@ -24,7 +24,7 @@ channel_list_budget = ["ARY DIGITAL", "HUM TV", "GEO ENTERTAINMENT", "TV ONE", "
                        "CARTOON NETWORK", "NICKELODEON", "MASALA TV", "PUBLIC NEWS", "TEN SPORTS", "GEO SUPER", 
                        "PTV HOME", "SUCH TV", "MEHRAN TV", "KTN", "DHARTI TV", "AWAZ", "KIDS POP", "KIDS ZONE",
                        "ATV", "HUM SITARAY", "BOL NEWS", "KTN NEWS", "SINDH TV NEWS",
-                       "PUNJAB TV", "KAY 2", "ARY MUSIK", "CINEMACHI KIDS", "GTV", "ROHI TV", "AFGHAN TV", "LAHORE RUNG"]
+                       "PUNJAB TV", "KAY 2", "ARY MUSIK", "CINEMACHI KIDS", "GTV", "ROHI TV", "AFGHAN TV"]
 
 tband_24hrs = ['00:00','01:00','02:00','03:00','04:00','05:00','06:00',
                '07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
@@ -286,6 +286,9 @@ def generate_budgetsheet_in_db(fname, monthm):
     
     budget_df = pd.DataFrame(columns=get_brands_budget.columns.tolist(), index=get_brands_budget.index)
     for i in range(len(channel_list_budget)):
+        print(channel_list_budget[i])
+        print(get_brands_budget)
+        print(budget_df)
         budget_df.loc[channel_list_budget[i],:] = get_brands_budget.loc[channel_list_budget[i],:]
         total = check_channels.loc[channel_list_budget[i],'TOTAL']
         percentage_df.loc[channel_list_budget[i],:] = (get_brands_budget.loc[channel_list_budget[i],:]/total)
