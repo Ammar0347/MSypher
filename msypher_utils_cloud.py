@@ -286,9 +286,6 @@ def generate_budgetsheet_in_db(fname, monthm):
     
     budget_df = pd.DataFrame(columns=get_brands_budget.columns.tolist(), index=get_brands_budget.index)
     for i in range(len(channel_list_budget)):
-        print(channel_list_budget[i])
-        print(get_brands_budget)
-        print(budget_df)
         budget_df.loc[channel_list_budget[i],:] = get_brands_budget.loc[channel_list_budget[i],:]
         total = check_channels.loc[channel_list_budget[i],'TOTAL']
         percentage_df.loc[channel_list_budget[i],:] = (get_brands_budget.loc[channel_list_budget[i],:]/total)
