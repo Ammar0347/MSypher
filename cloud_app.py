@@ -2101,7 +2101,7 @@ def process_file():
         spotsonly_df["Caption"] = spotsonly_df["Caption"].astype(str)
         spotsonly_df["Time Band"] = spotsonly_df["Time Band"].astype(str)
         spotsonly_df['CPRP'] = spotsonly_df.CPRP.replace(np.inf, 0)
-        spotsonly_df.columns = spotsonly_df.columns.str.strip()
+#        spotsonly_df.columns = spotsonly_df.columns.str.strip()
         msypher_utils_cloud.save_spots_only(spotsonly_df, monthm)
         msypher_utils_cloud.save_spots_with_inventory(final_df, monthm)
 #        final_df.to_sql(monthm+"_fullplan_spotswithinventory", conn, if_exists="replace")        
