@@ -138,7 +138,7 @@ def save_spots_only(spotsonly_df, monthm):
 
 def save_entries(preprocess_df, monthm):
     #con = sqlite3.conect("channelsplan.db", timeout=20)
-    preprocess_df.to_sql(monthm+"_entry", con=engine, if_exists="replace", index=False)
+    preprocess_df.to_sql(monthm+"_entry", con=engine, if_exists="replace")
     #con.close()
     
 def load_entries(monthm):
