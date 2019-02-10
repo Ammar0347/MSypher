@@ -528,7 +528,7 @@ def process_file():
             plan = r['Plan']
             channel_select = r['Channel Name']
             c = channel_select.replace("_", " ")
-            print(c)
+            print(c+"-"+plan+"-"+str(index))
 #            if (cprp_df_consolidated is not None) | (foc_df_consolidated is not None):
 #            if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0) & (len(foc_df_consolidated.loc[foc_df_consolidated['Channel']==c, :])==0) & (len(cprp_df_consolidated.loc[cprp_df_consolidated['Channel']==c, :])==0)):
             if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0)):
