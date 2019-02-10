@@ -5,6 +5,7 @@ Created on Tue Oct 30 15:46:46 2018
 @author: Ammar.Aamir
 """
 
+from sqlalchemy.types import VARCHAR
 import pandas as pd
 from datetime import timedelta
 import os
@@ -33,7 +34,9 @@ tband_24hrs = ['00:00','01:00','02:00','03:00','04:00','05:00','06:00',
 
 #engine = create_engine('mysql+pymysql://ammarA:ammar@123@mindshare-domino-db.cxvf7pdkalcg.eu-central-1.rds.amazonaws.com:3306/ammar_all_purpose')
 #engine = create_engine('mysql+pymysql://ammar:ammar123@msypher.cncilz0i4y2d.us-east-1.rds.amazonaws.com:3306/msypherdb')
+
 engine = create_engine('mysql+pymysql://ammarA:ammar123@msyphercloud.cncilz0i4y2d.us-east-1.rds.amazonaws.com:3306/ammardb')
+#engine = conn.connect()
 
 def daterange(date1, date2):
     for n in range(int ((date2 - date1).days)+1):
@@ -70,7 +73,7 @@ def load_budgetsheet(monthm):
 
 def save_budgetsheet(df, monthm):
     #con = sqlite3.conect("channelsplan.db", timeout=20)
-    df.to_sql(monthm+"_budgetsheet", con=engine, if_exists="replace")
+    df.to_sql(monthm+"_budgetsheet", con=engine, if_exists="replace", index_label='index',dtype={df.index.name:VARCHAR(5)})
     #con.close()
     
 def load_paid_optimizer(monthm):
@@ -88,12 +91,12 @@ def save_paid_optimizer(df, monthm):
 
 def load_foc_optimizer(monthm):
     #con = sqlite3.conect("channelsplan.db", timeout=20)
-    if engine.dialect.has_table(engine, "FOC_inventory_"+monthm):
-        d_f = pd.read_sql_query("select * from FOC_inventory_"+monthm+";", con=engine)
-        if 'index' in d_f.columns:
-            d_f = d_f.drop(['index'], axis=1)
-        #con.close()
-        return d_f
+#    if engine.dialect.has_table(engine, "FOC_inventory_"+monthm):
+    d_f = pd.read_sql_query("select * from FOC_inventory_"+monthm+";", con=engine)
+    if 'index' in d_f.columns:
+        d_f = d_f.drop(['index'], axis=1)
+    #con.close()
+    return d_f
 
 def save_foc_optimizer(df, monthm):
     #con = sqlite3.conect("channelsplan.db", timeout=20)
@@ -102,12 +105,12 @@ def save_foc_optimizer(df, monthm):
 
 def load_cprp_optimizer(monthm):
     #con = sqlite3.conect("channelsplan.db", timeout=20)
-    if engine.dialect.has_table(engine, "CPRP_inventory_"+monthm):
-        d_f = pd.read_sql_query("select * from CPRP_inventory_"+monthm+";", con=engine)
-        if 'index' in d_f.columns:
-            d_f = d_f.drop(['index'], axis=1)
-        #con.close()
-        return d_f
+#    if engine.dialect.has_table(engine, "CPRP_inventory_"+monthm):
+    d_f = pd.read_sql_query("select * from CPRP_inventory_"+monthm+";", con=engine)
+    if 'index' in d_f.columns:
+        d_f = d_f.drop(['index'], axis=1)
+    #con.close()
+    return d_f
 
 def save_cprp_optimizer(df, monthm):
     #con = sqlite3.conect("channelsplan.db", timeout=20)
