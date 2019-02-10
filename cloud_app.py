@@ -2105,7 +2105,7 @@ def process_file():
 #        print(spotsonly_df.index.name)
                 
         msypher_utils_cloud.save_spots_only(spotsonly_df, monthm)
-        msypher_utils_cloud.save_spots_with_inventory(final_df, monthm)
+#        msypher_utils_cloud.save_spots_with_inventory(final_df, monthm)
 #        final_df.to_sql(monthm+"_fullplan_spotswithinventory", conn, if_exists="replace")        
         
 #        filename = "Full_plan"
