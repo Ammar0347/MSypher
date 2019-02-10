@@ -53,7 +53,7 @@ class ReverseProxied(object):
 app = Flask(__name__)
 
 CORS(app)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///students.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://ammarA:ammar123@msyphercloud.cncilz0i4y2d.us-east-1.rds.amazonaws.com:3306/ammardb'
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.config['SECRET_KEY'] = "ammarbinaamir"
 db = SQLAlchemy(app)

@@ -35,7 +35,7 @@ tband_24hrs = ['00:00','01:00','02:00','03:00','04:00','05:00','06:00',
 #engine = create_engine('mysql+pymysql://ammarA:ammar@123@mindshare-domino-db.cxvf7pdkalcg.eu-central-1.rds.amazonaws.com:3306/ammar_all_purpose')
 #engine = create_engine('mysql+pymysql://ammar:ammar123@msypher.cncilz0i4y2d.us-east-1.rds.amazonaws.com:3306/msypherdb')
 
-engine = create_engine('mysql+pymysql://ammarA:ammar123@msyphercloud.cncilz0i4y2d.us-east-1.rds.amazonaws.com:3306/ammardb')
+engine = create_engine('mysql+pymysql://ammarA:ammar123@msyphercloud.cncilz0i4y2d.us-east-1.rds.amazonaws.com:3306/ammardb', pool_recycle=3600, pool_size=5)
 #engine = conn.connect()
 
 def daterange(date1, date2):
@@ -136,7 +136,7 @@ def load_spots_only(monthm):
 
 def save_spots_only(spotsonly_df, monthm):
     #con = sqlite3.conect("channelsplan.db", timeout=20)
-    spotsonly_df.to_sql(monthm+"_fullplan_spots", con=engine, if_exists="replace", chunksize=50)
+    spotsonly_df.to_sql(monthm+"_fullplan_spots", con=engine, if_exists="replace", chunksize=1, index=False)
     #con.close()
 
 def save_entries(preprocess_df, monthm):
