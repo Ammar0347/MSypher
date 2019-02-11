@@ -130,7 +130,7 @@ def save_spots_with_inventory(final_df, monthm):
 
 def load_spots_only(monthm):
     #con = sqlite3.conect("channelsplan.db", timeout=20)  
-    d_f = pd.read_sql_query("select * from "+monthm+"_fullplan_spots;", con=engine, index_col='index')
+    d_f = pd.read_sql_query("select * from "+monthm+"_fullplan_spots;", con=engine)
     #con.close()
     return d_f
 
