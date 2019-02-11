@@ -182,15 +182,16 @@ def save_brand_splits():
     #con = sqlite3.conect("channelsplan.db", timeout=20)
     brands_split = pd.ExcelFile('brand_splits.xlsx')
     splits_df = brands_split.parse('Cluster TG Working')
-    splits_df = splits_df.iloc[:, 2:-1]
+    splits_df = splits_df.iloc[:, 1:-1]
     splits_df.to_sql("Brand_splits", con=engine, if_exists="replace")
     #con.close()
 
 def load_brand_splits():
     #con = sqlite3.conect("channelsplan.db", timeout=20)
     splits_df = pd.read_sql_query("select * from Brand_splits;", con=engine)
-    splits_df.index = splits_df["Brands"]
-    splits_df = splits_df.drop(['index', 'Brands'], axis=1)
+#    splits_df.index = splits_df["Brands"]
+    if 'index' in splits_df.columns:
+        splits_df = splits_df.drop(['Brands'], axis=1)
     #con.close()
     return splits_df
 

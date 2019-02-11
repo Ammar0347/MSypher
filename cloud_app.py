@@ -339,7 +339,7 @@ def login():
         if(session['role']=="Planner" or session['role']=="Admin"):
             brands_index = infodf.brands.values[0].split(',')
             brands_index = list(map(int, brands_index))
-            splits_df = msypher_utils_cloud.load_splits()
+            splits_df = msypher_utils_cloud.load_brand_splits()
             session['brands'] = splits_df.Brands[splits_df.index.isin(brands_index)].tolist()
 
             return render_template('index.html',
@@ -414,13 +414,13 @@ def initializer():
                         mydf = mydf.append({
                                 'Allocated Budget': copybudget,
                                 'Channel Name': channel_select[i],
-                                'Others':splits_df.loc[brand, 'Others'],
-                                'Morning':splits_df.loc[brand, 'Morning'],
-                                'Afternoon':splits_df.loc[brand, 'Afternoon'],
-                                'Matinee':splits_df.loc[brand, 'Matinee'],
-                                'EPT':splits_df.loc[brand, 'EPT'],
-                                'PT':splits_df.loc[brand, 'PT'],
-                                'LPT':splits_df.loc[brand, 'LPT']
+                                'Others':splits_df.loc[splits_df["Brands"]==brand, 'Others'],
+                                'Morning':splits_df.loc[splits_df["Brands"]==brand, 'Morning'],
+                                'Afternoon':splits_df.loc[splits_df["Brands"]==brand, 'Afternoon'],
+                                'Matinee':splits_df.loc[splits_df["Brands"]==brand, 'Matinee'],
+                                'EPT':splits_df.loc[splits_df["Brands"]==brand, 'EPT'],
+                                'PT':splits_df.loc[splits_df["Brands"]==brand, 'PT'],
+                                'LPT':splits_df.loc[splits_df["Brands"]==brand, 'LPT']
                                 }, ignore_index=True)
 #                        mydf.loc[i, 'Allocated Budget'] = copybudget
 #                        mydf.loc[i, 'Channel Name'] = channel_select[i]        
