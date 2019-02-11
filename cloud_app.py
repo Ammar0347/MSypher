@@ -398,15 +398,13 @@ def initializer():
                     paid_channels = paid_df_consolidated.Channel.unique().tolist()
                     channel_select = [x for x in channel_select if x in paid_channels]
                 elif(plan =="CPRP"):
-                    # Removing channels on which inventory isn't available.
-                    if cprp_df_consolidated is not None:
-                        cprp_channels = cprp_df_consolidated.Channel.unique().tolist()
-                        channel_select = [x for x in channel_select if x in cprp_channels]
+                    # Removing channels on which inventory isn't available. 
+                    cprp_channels = cprp_df_consolidated.Channel.unique().tolist()
+                    channel_select = [x for x in channel_select if x in cprp_channels]
                 elif(plan == "FOC"):
                     # Removing channels on which inventory isn't available.
-                    if foc_df_consolidated is not None:
-                        foc_channels = foc_df_consolidated.Channel.unique().tolist()
-                        channel_select = [x for x in channel_select if x in foc_channels]
+                    foc_channels = foc_df_consolidated.Channel.unique().tolist()
+                    channel_select = [x for x in channel_select if x in foc_channels]
                 print(channel_select)
                 for i in range(len(channel_select)):
                     if(budget_df.loc[budget_df['Channel Name'] == channel_select[i],brand] is not None):
@@ -530,8 +528,8 @@ def process_file():
             c = channel_select.replace("_", " ")
             print(c+"-"+plan+"-"+str(index))
 #            if (cprp_df_consolidated is not None) | (foc_df_consolidated is not None):
-#            if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0) & (len(foc_df_consolidated.loc[foc_df_consolidated['Channel']==c, :])==0) & (len(cprp_df_consolidated.loc[cprp_df_consolidated['Channel']==c, :])==0)):
-            if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0)):
+            if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0) & (len(foc_df_consolidated.loc[foc_df_consolidated['Channel']==c, :])==0) & (len(cprp_df_consolidated.loc[cprp_df_consolidated['Channel']==c, :])==0)):
+#            if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0)):
                 continue
 
             brand = r['Brand Name']
