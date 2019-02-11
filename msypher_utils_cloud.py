@@ -191,7 +191,7 @@ def load_brand_splits():
     splits_df = pd.read_sql_query("select * from Brand_splits;", con=engine)
 #    splits_df.index = splits_df["Brands"]
     if 'index' in splits_df.columns:
-        splits_df = splits_df.drop(['Brands'], axis=1)
+        splits_df = splits_df.drop(['index'], axis=1)
     #con.close()
     return splits_df
 
