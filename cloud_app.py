@@ -1852,7 +1852,7 @@ def process_file():
                         cprp_dist.index = cprp_dist['index']
                         cprp_dist = cprp_dist.drop(['index'], axis=1)
                     
-                    cprp_rpm = channel_budget/cprp_dist.loc[cprp_dist["Channel Name"]==c, brand].sum()#'Ponds White Beauty Cream':'Dove Bars'].sum()
+                    cprp_rpm = channel_budget/cprp_dist.loc[cprp_dist["Channel Name"]==c, :].sum()#'Ponds White Beauty Cream':'Dove Bars'].sum()
                     rate_per_spot = cprp_rpm*dur_min
                     cprp_dist_split = cprp_dist
                     cprp_dist_split.iloc[:,1:] = cprp_dist.iloc[:,1:]*budgetsplit#100#(float(request.form['budgetsplit'])/100)
