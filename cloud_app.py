@@ -18,6 +18,7 @@ import random
 import time
 import json
 import msypher_utils_cloud
+import decimal
 
 pd.options.display.float_format = '{:.2f}'.format
 
@@ -60,7 +61,7 @@ db = SQLAlchemy(app)
 
 #ip = 'http://10.166.169.207:5000'
 ip = 'http://10.143.71.132:8888'
-monthm = "February_2019"
+monthm = "March_2019"
 final_df = pd.DataFrame()
 spotsonly_df = pd.DataFrame()
 preprocess_df = pd.DataFrame(columns = ['Brand Name', 'Caption', 'Channel Name', 'Duration', 'Allocated Budget', 'Campaign Type', 'Launch Date', 'Specific Slot',  'Campaign Start Date', 'Campaign End Date', 'Others', 'Morning', 'Afternoon', 'Matinee', 'EPT', 'PT', 'LPT'])
@@ -80,6 +81,214 @@ action = ""
 @app.route('/')
 def basic_info():
     return render_template('login.html', mlogin=url_for("login"))
+
+@app.route('/reach', methods = ['GET','POST'])
+def reach_score():
+    if request.method == 'GET':
+        df = msypher_utils_cloud.load_reach_data()
+        table_df = msypher_utils_cloud.load_reach_score()
+        return render_template('reach_scorecard.html', brands_list=df.Brand.tolist(),
+                               table=table_df.to_html(
+                                   classes='table dataTable no-footer" id = "data-table" style = "display:block;overflow:auto',
+                                   border=0, index=False))
+    if request.method == 'POST':
+        df = msypher_utils_cloud.load_reach_data()
+        brand = request.form.get('brand')
+        month = request.form.get('month')
+        year = request.form.get('year')
+        
+        mymonth = month+"-"+year
+        
+        use_df = df[df.Brand==brand]
+        
+        youtube = int(request.form.get('youtube'))
+        gdn = int(request.form.get('gdn'))
+        local = int(request.form.get('local'))
+        facebook = int(request.form.get('facebook'))
+        ultra = int(request.form.get('ultra'))
+        
+        youtube_reach = youtube/use_df['Online'].values[0]
+        gdn_reach = gdn/use_df['Online'].values[0]
+        local_reach = local/use_df['Online'].values[0]
+        facebook_reach = facebook/use_df['Online'].values[0]
+        ultra_reach = ultra/use_df['Online'].values[0]
+        
+        reach_score = (1 - ((1-youtube_reach)*(1-gdn_reach)*(1-local_reach)*(1-facebook_reach)*(1-ultra_reach)))*100
+        print(reach_score)        
+
+        reach_df = pd.DataFrame(columns=["Month", "Brand", "Score"])
+        reach_df = reach_df.append({"Month": mymonth,
+                   "Brand": brand,
+                   "Score": reach_score}, ignore_index=True)        
+        
+        print(reach_df)
+        msypher_utils_cloud.save_reach(reach_df)
+        return render_template('reach_scorecard.html', brands_list=df.Brand.tolist())
+
+
+#@app.route('/scorecard')
+#def scorecard():
+#    brands_df = msypher_utils.load_digital_brands()
+#    df = msypher_utils.load_score()
+#    return render_template('digital_scorecard.html', brands_list=brands_df.Brands.tolist(),
+#                           table=df.to_html(
+#                               classes='table dataTable no-footer" id = "data-table" style = "display:block;overflow:auto',
+#                               border=0, index=False))
+
+
+@app.route('/creative_summary', methods = ['GET','POST'])
+def creative_summary():
+    if request.method == 'GET':
+        brands_df = msypher_utils_cloud.load_digital_brands()
+        df = msypher_utils_cloud.load_score()
+        return render_template('digital_scorecard.html', brands_list=brands_df.Brands.tolist(),
+                               table=df.to_html(
+                                   classes='table dataTable no-footer" id = "data-table" style = "display:block;overflow:auto',
+                                   border=0, index=False))
+        
+    if request.method == 'POST':
+        brands_df = msypher_utils_cloud.load_digital_brands()
+        brand= request.form.get('brand')
+        month = request.form.get('month')
+        year = request.form.get('year')
+        assets = request.form.get('assets')
+        
+        mymonth = month+"-"+year
+        
+        platform = request.form.get('platform')
+        formattype = request.form.get('format')
+        
+        bif3s = request.form.get('bif3s')
+        if bif3s is not None:
+            bif3s = int(bif3s)
+        else:
+            bif3s = 0
+        zsv = request.form.get('zsv')
+        if zsv is not None:
+            zsv = int(zsv)
+        else:
+            zsv = 0
+        sdfaf = request.form.get('sdfaf')
+        if sdfaf is not None:
+            sdfaf = int(sdfaf)
+        else:
+            sdfaf = 0
+        fvf3s = request.form.get('fvf3s')
+        if fvf3s is not None:
+            fvf3s = int(fvf3s)
+        else:
+            fvf3s = 0
+        ctai = request.form.get('ctai')
+        if ctai is not None:
+            ctai = int(ctai)
+        else:
+            ctai = 0
+        
+        qualitative_sum = bif3s+zsv+sdfaf+fvf3s+ctai
+                
+        #Initializing variables
+        fb_average_percentage_watched = 0
+        fb_video_completion = 0
+        fb_engagement_percent = 0
+        gdn_ctr = 0
+        mobile = 0
+        youtube_vtr = 0 
+        youtube_completion = 0
+        scale_score = 0
+        rounded_score = 0
+        
+        if((platform=="Facebook") & (formattype=="Video")):
+            average_watched = float(request.form['fbvideo_average'])/100
+            fb_completion_rate = float(request.form['fbvideo_completion'])/100
+    
+            fb_watched = msypher_utils_cloud.load_fbwatched_keys()
+            fb_average_percentage_watched = fb_watched.Key[fb_watched.Percentage==average_watched].values[0]
+            fb_completion = msypher_utils_cloud.load_fbvidcompletion_keys()
+            fb_video_completion = fb_completion.Key[fb_completion.Percentage==fb_completion_rate].values[0]
+            scale_score = (fb_average_percentage_watched+fb_video_completion)/2
+            
+            rounded_2 = decimal.Decimal(scale_score).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_HALF_UP)
+            
+            rounded_score = decimal.Decimal(rounded_2).quantize(decimal.Decimal('.1'), rounding=decimal.ROUND_HALF_UP)#round(scale_score, 1)
+            
+        elif((platform=="Facebook") & (formattype=="Post")):
+            engagement = float(request.form['fbpost_engagement'])/100
+            fb_engagement = msypher_utils_cloud.load_fbengagement_keys()
+            fb_engagement_percent = fb_engagement.Key[fb_engagement.Percentage==engagement].values[0]
+    
+            scale_score = fb_engagement_percent
+            
+            rounded_2 = decimal.Decimal(scale_score).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_HALF_UP)
+            
+            rounded_score = decimal.Decimal(rounded_2).quantize(decimal.Decimal('.1'), rounding=decimal.ROUND_HALF_UP)#round(scale_score, 1)
+            
+        elif((platform=="GDN") & (formattype=="Banner")):
+            gdn_ctr_percent = float(request.form['gdnbanner_ctr'])/100
+            gdn_ctr_df = msypher_utils_cloud.load_gdnctr_keys()
+            gdn_ctr = gdn_ctr_df.Key[gdn_ctr_df.Percentage==gdn_ctr_percent].values[0]
+            
+            scale_score = gdn_ctr
+            rounded_2 = decimal.Decimal(scale_score).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_HALF_UP)
+            
+            rounded_score = decimal.Decimal(rounded_2).quantize(decimal.Decimal('.1'), rounding=decimal.ROUND_HALF_UP)#round(scale_score, 1)
+            
+        elif((platform=="Mobile") & (formattype=="Mobility")):
+            mobile_mobility = float(request.form['mobile_response'])/100
+            mobile_df = msypher_utils_cloud.load_mobile_keys()
+            mobile = mobile_df.Key[mobile_df.Percentage==mobile_mobility].values[0]
+            
+            scale_score = mobile
+            rounded_2 = decimal.Decimal(scale_score).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_HALF_UP)
+            
+            rounded_score = decimal.Decimal(rounded_2).quantize(decimal.Decimal('.1'), rounding=decimal.ROUND_HALF_UP)#round(scale_score, 1)            
+        elif((platform=="Youtube") & (formattype=="Video")):
+            youtube_vtr_percent = float(request.form['youvideo_vtr'])/100
+            youtube_completion_percent = float(request.form['youvideo_completion'])/100
+            
+            youtube_vtr_df = msypher_utils_cloud.load_youtubevtr_keys()
+            youtube_vtr = youtube_vtr_df.Key[youtube_vtr_df.Percentage==youtube_vtr_percent].values[0]
+            
+            youtube_completion_df = msypher_utils_cloud.load_youtubecompletion_keys()
+            youtube_completion = youtube_completion_df.Key[youtube_completion_df.Percentage==youtube_completion_percent].values[0]
+            
+            scale_score = (youtube_vtr+youtube_completion)/2
+            rounded_2 = decimal.Decimal(scale_score).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_HALF_UP)
+            
+            rounded_score = decimal.Decimal(rounded_2).quantize(decimal.Decimal('.1'), rounding=decimal.ROUND_HALF_UP)#round(scale_score, 1)
+
+        quantitativekey_df = msypher_utils.load_final_keys()
+        quantitative_score = quantitativekey_df.Percentage[quantitativekey_df.Key.values==float(rounded_score)].values[0]
+        
+        if(qualitative_sum == 0):
+            qualitative_score = quantitative_score
+        else:
+            qualitativekey_df = msypher_utils_cloud.load_qualitative_keys()
+            qualitative_score = qualitativekey_df.Percentage[qualitativekey_df.Key==qualitative_sum].values[0]
+        adjusted_score = quantitative_score + qualitative_score
+        if(qualitative_sum==0):
+            final_score = quantitative_score
+        else:
+            if adjusted_score > 1.0:
+                final_score = 1.0
+            else:
+                final_score = adjusted_score
+            
+        
+        df = pd.DataFrame(columns=["Month", "Brand", "Assets", "Platform", "Format", "Score"])
+        df = df.append({"Month": mymonth,
+                   "Brand": brand,
+                   "Assets": assets,
+                   "Platform": platform,
+                   "Format": formattype,
+                   "Score": final_score*100}, ignore_index=True)
+        
+        print(df)
+        msypher_utils_cloud.save_score(df)
+        finaldf = msypher_utils_cloud.load_score()
+        return render_template('digital_scorecard.html', brands_list=brands_df.Brands.tolist(),
+                               table=finaldf.to_html(
+                                   classes='table dataTable no-footer" id = "data-table" style = "display:block;overflow:auto',
+                                   border=0, index=False))
 
 @app.route('/update_view_budget')
 def viewbudget():
@@ -545,7 +754,7 @@ def process_file():
             r['PT'] = float(r['PT'])
             r['LPT'] = float(r['LPT'])
             
-            channel_budget = budget_df.loc[budget_df["Channel Name"]==c, brand].sum()
+            channel_budget = sum(budget_df.loc[budget_df["Channel Name"]==c, 'Ponds White Beauty Cream':'Dove Bars'].sum())
             totalbudget = float(r['Allocated Budget'])
             authorized_budget = totalbudget
             start_dt = pd.to_datetime(r['Campaign Start Date'])
@@ -1852,7 +2061,11 @@ def process_file():
                         cprp_dist.index = cprp_dist['index']
                         cprp_dist = cprp_dist.drop(['index'], axis=1)
                     
-                    cprp_rpm = channel_budget/cprp_dist.loc[cprp_dist["Channel Name"]==c, 'Ponds White Beauty Cream':].sum()#'Ponds White Beauty Cream':'Dove Bars'].sum()
+                    cprp_rpm = channel_budget/sum(cprp_dist.loc[cprp_dist["Channel Name"]==c, 'Ponds White Beauty Cream':'Dove Bars'].sum())
+#                    print(cprp_rpm)
+                    print(channel_budget)
+                    print(cprp_dist.loc[cprp_dist["Channel Name"]==c, 'Ponds White Beauty Cream':'Dove Bars'].sum())
+                    print(cprp_rpm)
                     rate_per_spot = cprp_rpm*dur_min
                     cprp_dist_split = cprp_dist
                     cprp_dist_split.iloc[:,1:] = cprp_dist.iloc[:,1:]*budgetsplit#100#(float(request.form['budgetsplit'])/100)

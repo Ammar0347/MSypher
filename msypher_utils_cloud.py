@@ -38,6 +38,65 @@ tband_24hrs = ['00:00','01:00','02:00','03:00','04:00','05:00','06:00',
 engine = create_engine('mysql+pymysql://ammarA:ammar123@msyphercloud.cncilz0i4y2d.us-east-1.rds.amazonaws.com:3306/ammardb', pool_recycle=3600, pool_size=5)
 #engine = conn.connect()
 
+
+def load_reach_data():
+    df = pd.read_sql_query("select * from Reach;", con=engine)
+    return df
+
+def load_reach_score():
+    df = pd.read_sql_query("select * from Reach_score;", con=engine)
+    return df
+
+def save_reach(df):
+    df.to_sql("Reach_score", con=engine, if_exists="append")
+
+def load_score():
+    df = pd.read_sql_query("select * from Digital_score;", con=engine)
+    return df
+
+def save_score(df):
+    df.to_sql("Digital_score", con=engine, if_exists="append")
+
+def load_digital_brands():
+    brands_df = pd.read_sql_query("select * from Brands_Digital;", con=engine)
+    return brands_df
+
+def load_fbwatched_keys():
+    fb_watched = pd.read_sql_query("select * from fb_percent_watched;", con=engine)
+    return fb_watched
+
+def load_fbvidcompletion_keys():
+    fb_completion = pd.read_sql_query("select * from fb_video_completion;", con=engine)
+    return fb_completion
+
+def load_fbengagement_keys():
+    fb_engagement = pd.read_sql_query("select * from fb_engagement;", con=engine)
+    return fb_engagement
+
+def load_gdnctr_keys():
+    gdn_ctr = pd.read_sql_query("select * from gdn_ctr;", con=engine)
+    return gdn_ctr
+
+def load_mobile_keys():
+    mobile = pd.read_sql_query("select * from mobile_mobility;", con=engine)
+    return mobile
+
+def load_youtubevtr_keys():
+    youtube_vtr_df = pd.read_sql_query("select * from youtube_vtr;", con=engine)
+    return youtube_vtr_df
+
+def load_youtubecompletion_keys():
+    youtube_completion_df = pd.read_sql_query("select * from fb_video_completion;", con=engine)
+    return youtube_completion_df
+
+def load_final_keys():
+    finalkey_df = pd.read_sql_query("select * from final_key;", con=engine)
+    return finalkey_df
+
+def load_qualitative_keys():
+    qualitative_df = pd.read_sql_query("select * from qualitative_key;", con=engine)
+    return qualitative_df
+
 def daterange(date1, date2):
     for n in range(int ((date2 - date1).days)+1):
         yield date1 + timedelta(n)
@@ -146,7 +205,7 @@ def save_entries(preprocess_df, monthm):
     
 def load_entries(monthm):
     #con = sqlite3.conect("channelsplan.db", timeout=20)
-    preprocess_df = pd.read_sql_query("select * from "+monthm+"_entry;", con=engine)
+    preprocess_df = pd.read_sql_query("select * from "+monthm+"_entry_test;", con=engine)
     if 'index' in preprocess_df.columns:
         preprocess_df = preprocess_df.drop(['index'], axis=1)
 #    preprocess_df.to_sql("November_APNA_Sunsilk", con=engine, if_exists="replace")
@@ -307,6 +366,7 @@ def generate_paid_optimizer_in_db(fname, monthm, startdt, enddt):
     paid_channel_inventories = []
     paid_channel_timebands = []
     for s in sheet_names:
+        print(s)
         if s == "ARY DIGITAL" or s == "PTV HOME":
             t = 26
         else:
