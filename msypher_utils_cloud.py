@@ -205,7 +205,7 @@ def save_entries(preprocess_df, monthm):
     
 def load_entries(monthm):
     #con = sqlite3.conect("channelsplan.db", timeout=20)
-    preprocess_df = pd.read_sql_query("select * from "+monthm+"_entry_test;", con=engine)
+    preprocess_df = pd.read_sql_query("select * from "+monthm+"_entry;", con=engine)
     if 'index' in preprocess_df.columns:
         preprocess_df = preprocess_df.drop(['index'], axis=1)
 #    preprocess_df.to_sql("November_APNA_Sunsilk", con=engine, if_exists="replace")
