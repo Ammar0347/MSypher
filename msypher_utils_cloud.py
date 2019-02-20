@@ -505,7 +505,7 @@ def generate_ratings_in_db(fname, mycolumns, monthm):
         c = 'Periods('+r+')'
         try:
             ratings_df = ratingsheet.parse(c)
-            ratings_df = ratings_df.iloc[2:,1:]
+            ratings_df = ratings_df.iloc[1:,1:]
             ratings_df.columns = mycolumns
             ratings_df['Channel'] = r
             if(r == "ARY DIGITAL" or r == "PTV HOME"):
