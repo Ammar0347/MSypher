@@ -732,16 +732,19 @@ def process_file():
     if request.method == 'POST':
         MAX_SPOTS_PER_HOUR = 4
         for index, r in preprocess_df.iterrows():
+            if(index < 372):
+                continue
             plan = r['Plan']
             channel_select = r['Channel Name']
             c = channel_select.replace("_", " ")
-            print(c+"-"+plan+"-"+str(index))
+            
 #            if (cprp_df_consolidated is not None) | (foc_df_consolidated is not None):
             if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0) & (len(foc_df_consolidated.loc[foc_df_consolidated['Channel']==c, :])==0) & (len(cprp_df_consolidated.loc[cprp_df_consolidated['Channel']==c, :])==0)):
 #            if((len(invplan_df_consolidated.loc[invplan_df_consolidated['Channel']==c, :])==0)):
                 continue
 
             brand = r['Brand Name']
+            print(brand+"-"+c+"-"+plan+"-"+str(index))
             caption = r['Caption']
             duration = float(r['Duration'])
             dur_min = duration/60
