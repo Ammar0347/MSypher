@@ -732,8 +732,6 @@ def process_file():
     if request.method == 'POST':
         MAX_SPOTS_PER_HOUR = 4
         for index, r in preprocess_df.iterrows():
-            if(index < 372):
-                continue
             plan = r['Plan']
             channel_select = r['Channel Name']
             c = channel_select.replace("_", " ")
