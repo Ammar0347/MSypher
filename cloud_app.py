@@ -2063,9 +2063,9 @@ def process_file():
                     
                     cprp_rpm = channel_budget/sum(cprp_dist.loc[cprp_dist["Channel Name"]==c, 'Ponds White Beauty Cream':'Dove Bars'].sum())
 #                    print(cprp_rpm)
-                    print(channel_budget)
-                    print(cprp_dist.loc[cprp_dist["Channel Name"]==c, 'Ponds White Beauty Cream':'Dove Bars'].sum())
-                    print(cprp_rpm)
+#                    print(channel_budget)
+#                    print(cprp_dist.loc[cprp_dist["Channel Name"]==c, 'Ponds White Beauty Cream':'Dove Bars'].sum())
+#                    print(cprp_rpm)
                     rate_per_spot = cprp_rpm*dur_min
                     cprp_dist_split = cprp_dist
                     cprp_dist_split.iloc[:,1:] = cprp_dist.iloc[:,1:]*budgetsplit#100#(float(request.form['budgetsplit'])/100)
